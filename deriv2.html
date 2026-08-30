@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SUPERBOT 3% EARNING</title>
+<style>
+body{background:#0a0e1a;color:#fff;font-family:Arial;text-align:center;padding:20px}
+.box{background:#1a2332;padding:20px;border-radius:15px;margin:15px 0;border:1px solid #00ff88}
+button{padding:15px 25px;margin:10px;border:none;border-radius:10px;font-weight:bold}
+.rise{background:#00ff88;color:#000}
+.fall{background:#ff4444;color:#fff}
+input{padding:12px;width:90%;border-radius:8px;border:none;margin:8px}
+</style>
+</head>
+<body>
+<h2>⚡ SUPERBOT - 3% EARNING ACTIVE</h2>
+<p>App: 34fNg2TwtAKYDBNBc6B3L</p>
+<div class="box">
+<input id="token" placeholder="Paste Deriv API Token Here">
+<button onclick="connect()" style="background:#00ff88;width:95%">CONNECT</button>
+<p id="status">Not Connected</p>
+<p id="balance"></p>
+</div>
+<div class="box">
+<input id="stake" type="number" value="1">
+<button class="rise" onclick="trade('CALL')">RISE 📈</button>
+<button class="fall" onclick="trade('PUT')">FALL 📉</button>
+<p id="result"></p>
+</div>
+<script>
+let ws,ok=false;
+function connect(){
+let t=document.getElementById('token').value.trim();
+if(!t){alert('Paste token from Deriv > Settings > API Token');return;}
+ws=new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=34fNg2TwtAKYDBNBc6B3L');
+ws.onopen=()=>{ws.send(JSON.stringify({authorize:t}));document.getElementById('status').innerText='Connecting...';};
+ws.onmessage=e=>{
+let d=JSON.parse(e.data);
+if(d.msg_type=='authorize'){ok=true;document.getElementById('status').innerText='✅ CONNECTED - 3% ACTIVE';ws.send(JSON.stringify({balance:1}));}
+if(d.msg_type=='balance'){document.getElementById('balance').innerText='Balance: $'+d.balance.balance;}
+if(d.msg_type=='buy'){document.getElementById('result').innerText='Trade OK: '+d.buy.longcode;}
+if(d.error){document.getElementById('status').innerText=d.error.message;}
+};
+}
+function trade(type){
+if(!ok){alert('Connect first');return;}
+let s=document.getElementById('stake').value||1;
+ws.send(JSON.stringify({buy:1,price:s,parameters:{amount:s,basis:'stake',contract_type:type,currency:'USD',duration:1,duration_unit:'t',symbol:'R_100'}}));
+}
+</script>
+</body>
+</html>
