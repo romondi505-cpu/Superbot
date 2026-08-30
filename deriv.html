@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SUPERBOT DERIV</title>
+<style>
+body{background:#0f1115;color:#fff;font-family:sans-serif;text-align:center;padding:20px}
+.card{background:#1c1f2a;padding:20px;border-radius:15px;margin:10px 0}
+button{padding:15px 25px;border:none;border-radius:10px;font-weight:bold;margin:5px}
+.green{background:#00d084;color:#000}
+.red{background:#ff3b3b;color:#fff}
+input{padding:12px;border-radius:8px;border:none;width:80%;margin:10px}
+</style>
+</head>
+<body>
+<h1>⚡ SUPERBOT DERIV</h1>
+<div class="card">
+<input id="token" placeholder="Paste Deriv API Token">
+<button class="green" onclick="connect()">CONNECT DERIV</button>
+<p id="status">Not Connected</p>
+<p id="balance"></p>
+</div>
+<div class="card">
+<h3>Quick Trade - Volatility 75</h3>
+<input id="stake" type="number" value="1" placeholder="Stake $">
+<br>
+<button class="green" onclick="trade('CALL')">RISE 📈</button>
+<button class="red" onclick="trade('PUT')">FALL 📉</button>
+<p id="result"></p>
+</div>
+<a href="index.html" style="color:#00d084">← Back to Superbot</a>
+<script>
+let ws, authToken;
+function connect(){
+ authToken=document.getElementById('token').value;
+ ws=new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+ ws.onopen=()=>ws.send(JSON.stringify({authorize:authToken}));
+ ws.onmessage=(msg)=>{
+  let data=JSON.parse(msg.data);
+  if(data.authorize){document.getElementById('status').innerText='✅ Connected: '+data.authorize.loginid; ws.send(JSON.stringify({balance:1}));}
+  if(data.balance)document.getElementById('balance').innerText='Balance: $'+data.balance.balance;
+  if(data.buy)document.getElementById('result').innerText='Trade OPEN: '+data.buy.longcode;
+  if(data.error)document.getElementById('result').innerText='Error: '+data.error.message;
+ };
+}
+function trade(type){
+ let stake=document.getElementById('stake').value;
+ ws.send(JSON.stringify({buy:1,price:stake,parameters:{amount:stake,basis:'stake',contract_type:type,currency:'USD',duration:1,duration_unit:'t',symbol:'R_75'}}));
+}
+</script>
+</body>
+</html>
